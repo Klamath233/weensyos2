@@ -1,0 +1,44 @@
+Name: Xi Han
+UCLA ID: 504136747
+
+
+-------------------------------------------------------------------------------
+
+Response to Exercise 1:
+
+The name of the scheduling algorithm is: Round-Robin.
+
+
+(Exercise 2 is a coding exercise)
+
+
+Response to Exercise 3:
+
+Average turnaround time for scheduling_algorithm 0: 958.5ms
+Average turnaround time for scheduling_algorithm 1: 800ms
+
+Average wait time for scheduling_algorithm 0: 1.5ms
+Average wait time for scheduling_algorithm 1: 480ms
+
+
+Exercise 4:
+
+Did you complete Exercise 4A or Exercise 4B?
+4A
+
+Exercise 5:
+
+Process 4 was interrupted before it could copy `4' to `cursorpos'.
+(Exercise 6 is a coding exercise)
+
+
+Anything else you'd like us to know:
+Exercise 2:
+
+Add `int p_priority' to the process descriptor.
+During initialization, assign priorities accordingly.
+Schedule according to `p_priority'.
+
+
+
+
