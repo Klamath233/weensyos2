@@ -102,4 +102,25 @@ sys_atomic_printc(uint16_t colored_char)
 		         "a" (colored_char)
 		     : "cc", "memory");
 }
+
+/*****************************************************************************
+ * sys_set_share
+ *
+ *   Yield control of the CPU to the kernel, which will pick another
+ *   process to run.  (It might run this process again, depending on the
+ *   scheduling policy.)
+ *
+ *****************************************************************************/
+
+static inline void
+sys_set_share(int share)
+{
+	// We call a system call by causing an interrupt with the 'int'
+	// instruction.  In weensyos, the type of system call is indicated
+	// by the interrupt number -- here, INT_SYS_YIELD.
+	asm volatile("int %0\n"
+		     : : "i" (INT_SYS_SET_SHARE),
+		         "a" (share)
+		     : "cc", "memory");
+}
 #endif

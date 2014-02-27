@@ -24,11 +24,12 @@ Average wait time for scheduling_algorithm 1: 480ms
 Exercise 4:
 
 Did you complete Exercise 4A or Exercise 4B?
-4A
+4A & 4B
 
 Exercise 5:
 
 Process 4 was interrupted before it could copy `4' to `cursorpos'.
+
 (Exercise 6 is a coding exercise)
 
 
@@ -38,6 +39,24 @@ Exercise 2:
 Add `int p_priority' to the process descriptor.
 During initialization, assign priorities accordingly.
 Schedule according to `p_priority'.
+
+Exercise 4A:
+
+Like exercise 2, `p_priority' plays an important role here.
+Introduce a pointer to record last executed pid (a clock algorithm).
+During every loop, traverse the process array for the highest priority.
+Next, traverse the process array again, find the first process with the highest
+priority and behind the last executed process.
+If we cannot find a qualified process, reset last executed pid to 0.
+
+Exercise 4B:
+
+Introduce a new array for candidates.
+A process is qualified for being a candidate if it has a nonzero share.
+During every loop, first check for all qualified processes.
+If there is no qualified process, reset the share of everyone to its maximum and
+continue.
+Else, randomly pick a candidate, decrement its share and run it.
 
 
 

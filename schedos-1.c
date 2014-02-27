@@ -20,6 +20,9 @@
 #ifndef NICE_VALUE
 #define NICE_VALUE 0
 #endif
+#ifndef SHARE_VALUE
+#define SHARE_VALUE 1
+#endif
 void
 start(void)
 {
@@ -29,6 +32,7 @@ start(void)
 		// Write characters to the console, yielding after each one.
 		if (i == 100) {
 		    sys_renice(NICE_VALUE);
+		    sys_set_share(SHARE_VALUE);
 		}
 		sys_atomic_printc(PRINTCHAR);
 		// *cursorpos++ = PRINTCHAR;

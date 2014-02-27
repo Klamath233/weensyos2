@@ -49,7 +49,8 @@ $(OBJDIR)/%-bootsector: $(OBJDIR)/bootstart.o $(OBJDIR)/%-boot.o
 SCHEDOS_KERN_FILES = $(OBJDIR)/schedos-int.o $(OBJDIR)/schedos-kern.o \
 	$(OBJDIR)/schedos-x86.o $(OBJDIR)/schedos-loader.o \
 	$(OBJDIR)/lib.o schedos-symbols.ld \
-	$(OBJDIR)/lock.o
+	$(OBJDIR)/lock.o \
+	$(OBJDIR)/rng.o
 
 SCHEDOS_BIN_FILES = $(OBJDIR)/schedos-1 $(OBJDIR)/schedos-2 \
 	$(OBJDIR)/schedos-3 $(OBJDIR)/schedos-4

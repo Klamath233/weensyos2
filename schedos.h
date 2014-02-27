@@ -15,7 +15,7 @@
 #define INT_SYS_EXIT		        49
 #define INT_SYS_RENICE		        50
 #define INT_SYS_ATOMIC_PRINTC		51
-
+#define INT_SYS_SET_SHARE           52
 
 // The current screen cursor position (stored at memory location 0x198000).
 

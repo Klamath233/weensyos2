@@ -2,6 +2,7 @@
 #include "x86.h"
 #include "lib.h"
 #include "lock.h"
+#include "rng.h"
 
 /*****************************************************************************
  * schedos-kern
@@ -66,7 +67,7 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-	interrupt_controller_init(1);
+	interrupt_controller_init(0);
 	console_clear();
 
 	// Initialize process descriptors as empty
@@ -95,6 +96,10 @@ start(void)
 
         // Initialize priority.
         proc->p_priority = 0;
+        
+        // Initialize share.
+        proc->p_share_max = 1;
+        proc->p_share = proc->p_share_max;
 	}
 
 	// Initialize the cursor-position shared variable to point to the
@@ -102,7 +107,7 @@ start(void)
 	cursorpos = (uint16_t *) 0xB8000;
 	lock_init(&cursor_lock);
 	// Initialize the scheduling algorithm.
-	scheduling_algorithm = 0;
+	scheduling_algorithm = 3;
 
 	// Switch to the first process.
 	run(&proc_array[1]);
@@ -163,6 +168,12 @@ interrupt(registers_t *reg)
 		*cursorpos++ = (uint16_t) reg->reg_eax;
 		lock_release(&cursor_lock);
 		run(current);
+	
+	case INT_SYS_SET_SHARE:
+		// 'sys_user*' are provided for your convenience, in case you
+		// want to add a system call.
+		current->p_share_max = reg->reg_eax;
+		run(current);
 
 	case INT_CLOCK:
 		// A clock interrupt occurred (so an application exhausted its
@@ -193,7 +204,8 @@ interrupt(registers_t *reg)
  *****************************************************************************/
 #define LOWEST_PRIORITY -20
 static int last_proc_id = 1;
-
+static pid_t candidate_array[NPROCS - 1];
+static int candidate_number = 0;
 void
 schedule(void)
 {
@@ -254,6 +266,41 @@ schedule(void)
 		    
 		    last_proc_id = 0;
 		}
+	}
+	
+	if (scheduling_algorithm == 3) {
+	    while (1) {
+	    
+	        int i;
+	        
+	        // Initialize candidate array every loop.
+	        candidate_number = 0;
+	        for (i = 0; i < NPROCS - 1; i++) {
+                candidate_array[i] = 0;
+            }
+            
+            // Add candidates to array.
+	        for (pid = 1; pid < NPROCS; pid++) {
+	            if (proc_array[pid].p_state == P_RUNNABLE
+	                && proc_array[pid].p_share > 0) 
+	            {
+	                candidate_array[candidate_number++] = pid;
+	            }
+	        }
+	        
+	        // If no candidate, reset shares and restart loop.
+	        if (candidate_array[0] == 0) {
+	            for (pid = 1; pid < NPROCS; pid++) {
+	                proc_array[pid].p_share = proc_array[pid].p_share_max;
+	            }
+	            continue;
+	        }
+	        
+	        // Pick a random candidate and consume its share.
+	        pid_t chosen = candidate_array[get_random() % candidate_number];
+	        proc_array[chosen].p_share--;
+	        run(&proc_array[chosen]);
+	    }
 	}
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
