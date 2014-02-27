@@ -1,4 +1,4 @@
 00400000 T start
-00401031 A __bss_start
-00401031 A _edata
-00401034 A _end
+0040102f A __bss_start
+0040102f A _edata
+00401030 A _end

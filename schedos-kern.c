@@ -94,10 +94,10 @@ start(void)
 		// Mark the process as runnable!
 		proc->p_state = P_RUNNABLE;
 
-        // Initialize priority.
+        // Initialize priority. (for algorithm 1 and 2)
         proc->p_priority = 0;
         
-        // Initialize share.
+        // Initialize share. (for algorithm 3 and 4)
         proc->p_share_max = 1;
         proc->p_share = proc->p_share_max;
 	}
@@ -108,7 +108,6 @@ start(void)
 	lock_init(&cursor_lock);
 	// Initialize the scheduling algorithm.
 	scheduling_algorithm = 3;
-
 	// Switch to the first process.
 	run(&proc_array[1]);
 
@@ -157,21 +156,19 @@ interrupt(registers_t *reg)
 		schedule();
 
 	case INT_SYS_RENICE:
-		// 'sys_user*' are provided for your convenience, in case you
-		// want to add a system call.
+		// `sys_renice' system call sets the priority of the current process.
 		current->p_priority = reg->reg_eax;
 		run(current);
 
 	case INT_SYS_ATOMIC_PRINTC:
-		/* Your code here (if you want). */
+		// `sys_atomic_printc' prints a character to screen atomically.
 		lock_acquire(&cursor_lock);
 		*cursorpos++ = (uint16_t) reg->reg_eax;
 		lock_release(&cursor_lock);
 		run(current);
 	
 	case INT_SYS_SET_SHARE:
-		// 'sys_user*' are provided for your convenience, in case you
-		// want to add a system call.
+		// `sys_set_share' sets the maximum share of the current process
 		current->p_share_max = reg->reg_eax;
 		run(current);
 
@@ -203,6 +200,7 @@ interrupt(registers_t *reg)
  *
  *****************************************************************************/
 #define LOWEST_PRIORITY -20
+#define MAX_LOTTERY_TICKET 10
 static int last_proc_id = 1;
 static pid_t candidate_array[NPROCS - 1];
 static int candidate_number = 0;
@@ -212,7 +210,7 @@ schedule(void)
     
 	pid_t pid = current->p_pid;
 
-	if (scheduling_algorithm == 0)
+	if (scheduling_algorithm == 0) { // Round Robin.
 		while (1) {
 			pid = (pid + 1) % NPROCS;
 
@@ -222,8 +220,9 @@ schedule(void)
 			if (proc_array[pid].p_state == P_RUNNABLE)
 				run(&proc_array[pid]);
 		}
+	}
 
-	if (scheduling_algorithm == 1) {
+	if (scheduling_algorithm == 1) { // Strict Priority.
         for (pid = 1; pid < NPROCS; pid++) {
             proc_array[pid].p_priority = NPROCS - pid;        
         }
@@ -244,7 +243,7 @@ schedule(void)
 		}
 	}
 		
-	if (scheduling_algorithm == 2) {
+	if (scheduling_algorithm == 2) { // Priority
 		while (1) {
 		    int highest_priority = LOWEST_PRIORITY;
 		    for (pid = 1; pid < NPROCS; pid++) {
@@ -257,7 +256,7 @@ schedule(void)
 		    for (pid = 1; pid < NPROCS; pid++) {
 		        if (proc_array[pid].p_state == P_RUNNABLE &&
 		            proc_array[pid].p_priority == highest_priority
-		            && pid > last_proc_id)
+		            && pid > last_proc_id) // Clock algorithm.
 		        {
 		            last_proc_id = pid;
 		            run(&proc_array[pid]);
@@ -268,7 +267,7 @@ schedule(void)
 		}
 	}
 	
-	if (scheduling_algorithm == 3) {
+	if (scheduling_algorithm == 3) { // Proportional Share.
 	    while (1) {
 	    
 	        int i;
@@ -289,8 +288,46 @@ schedule(void)
 	        }
 	        
 	        // If no candidate, reset shares and restart loop.
+	        if (candidate_array[0] == 0) { 
+	            for (pid = 1; pid < NPROCS; pid++) {
+	                proc_array[pid].p_share = proc_array[pid].p_share_max;
+	            }
+	            continue;
+	        }
+	        
+	        // Pick a random candidate and consume its share.
+	        pid_t chosen = candidate_array[get_random() % candidate_number];
+	        proc_array[chosen].p_share--;
+	        run(&proc_array[chosen]);
+	    }
+	}
+	
+		if (scheduling_algorithm == 4) { // Lottery.
+	    while (1) {
+	    
+	        int i;
+	        
+	        // Initialize candidate array every loop.
+	        candidate_number = 0;
+	        for (i = 0; i < NPROCS - 1; i++) {
+                candidate_array[i] = 0;
+            }
+            
+            // Add candidates to array.
+	        for (pid = 1; pid < NPROCS; pid++) {
+	            if (proc_array[pid].p_state == P_RUNNABLE
+	                && proc_array[pid].p_share > 0) 
+	            {
+	                candidate_array[candidate_number++] = pid;
+	            }
+	        }
+	        
+	        // If no candidate, randomize maximum share.
+	        // Then, reset shares and restart loop.
 	        if (candidate_array[0] == 0) {
 	            for (pid = 1; pid < NPROCS; pid++) {
+	                // `+1' to avoid starvation.
+	                proc_array[pid].p_share_max = get_random() % MAX_LOTTERY_TICKET + 1;
 	                proc_array[pid].p_share = proc_array[pid].p_share_max;
 	            }
 	            continue;

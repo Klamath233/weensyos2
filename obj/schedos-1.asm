@@ -13,18 +13,18 @@ start(void)
 {
   200000:	53                   	push   %ebx
   200001:	31 d2                	xor    %edx,%edx
+ *****************************************************************************/
+
+static inline void
 sys_atomic_printc(uint16_t colored_char)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
   200003:	bb 31 0c 00 00       	mov    $0xc31,%ebx
+ *****************************************************************************/
+
+static inline void
 sys_renice(int priority)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
   200008:	31 c9                	xor    %ecx,%ecx
   20000a:	eb 10                	jmp    20001c <start+0x1c>
@@ -37,19 +37,19 @@ sys_renice(int priority)
   20000f:	75 0b                	jne    20001c <start+0x1c>
   200011:	89 c8                	mov    %ecx,%eax
   200013:	cd 32                	int    $0x32
+ *****************************************************************************/
+
+static inline void
 sys_set_share(int share)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
   200015:	b8 01 00 00 00       	mov    $0x1,%eax
   20001a:	cd 34                	int    $0x34
+ *****************************************************************************/
+
+static inline void
 sys_atomic_printc(uint16_t colored_char)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
   20001c:	89 d8                	mov    %ebx,%eax
   20001e:	cd 33                	int    $0x33

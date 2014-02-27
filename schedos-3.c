@@ -6,5 +6,6 @@
  *****************************************************************************/
 
 #define PRINTCHAR	('3' | 0x0900)
-
+#define NICE_VALUE 3
+#define SHARE_VALUE 3
 #include "schedos-1.c"

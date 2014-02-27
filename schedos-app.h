@@ -64,18 +64,13 @@ sys_exit(int status)
 /*****************************************************************************
  * sys_renice
  *
- *   Yield control of the CPU to the kernel, which will pick another
- *   process to run.  (It might run this process again, depending on the
- *   scheduling policy.)
+ *   Set the priority of the current process.
  *
  *****************************************************************************/
 
 static inline void
 sys_renice(int priority)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
 		     : : "i" (INT_SYS_RENICE),
 		         "a" (priority)
@@ -85,18 +80,13 @@ sys_renice(int priority)
 /*****************************************************************************
  * sys_atomic_printc
  *
- *   Yield control of the CPU to the kernel, which will pick another
- *   process to run.  (It might run this process again, depending on the
- *   scheduling policy.)
+ *   Print a character atomically.
  *
  *****************************************************************************/
 
 static inline void
 sys_atomic_printc(uint16_t colored_char)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
 		     : : "i" (INT_SYS_ATOMIC_PRINTC),
 		         "a" (colored_char)
@@ -106,18 +96,13 @@ sys_atomic_printc(uint16_t colored_char)
 /*****************************************************************************
  * sys_set_share
  *
- *   Yield control of the CPU to the kernel, which will pick another
- *   process to run.  (It might run this process again, depending on the
- *   scheduling policy.)
+ *   Set the maximum share of the current process.
  *
  *****************************************************************************/
 
 static inline void
 sys_set_share(int share)
 {
-	// We call a system call by causing an interrupt with the 'int'
-	// instruction.  In weensyos, the type of system call is indicated
-	// by the interrupt number -- here, INT_SYS_YIELD.
 	asm volatile("int %0\n"
 		     : : "i" (INT_SYS_SET_SHARE),
 		         "a" (share)

@@ -14,7 +14,7 @@ The name of the scheduling algorithm is: Round-Robin.
 
 Response to Exercise 3:
 
-Average turnaround time for scheduling_algorithm 0: 958.5ms
+Average turnaround time for scheduling_algorithm 0: 1278.5ms
 Average turnaround time for scheduling_algorithm 1: 800ms
 
 Average wait time for scheduling_algorithm 0: 1.5ms
@@ -34,6 +34,16 @@ Process 4 was interrupted before it could copy `4' to `cursorpos'.
 
 
 Anything else you'd like us to know:
+
+Scheduling Algorithm Table
+Number        Algorithm
+---           ---
+0             Round Robin
+1             Strict Priority
+2             Priority
+3             Proportional Share
+4             Lottery
+
 Exercise 2:
 
 Add `int p_priority' to the process descriptor.
@@ -58,6 +68,35 @@ If there is no qualified process, reset the share of everyone to its maximum and
 continue.
 Else, randomly pick a candidate, decrement its share and run it.
 
+Exercise 7:
+
+It's mostly same as Exercise 4B, except that every time we reset the candidate array,
+we also randomize the max share to simulate the lottery process.
+Consequently, every turn every candidate gets different shares, that is, lottery scheduling.
+The random share is garanteed to be larger than 0 to avoid starvation.
+
+Exercise 8:
+Implement lock with atomic_swap and compare_and_swap.
+In lock.h, if COMPARE_AND_SWAP is defined. The lock uses compare_and_swap.
+Otherwise, it uses atomic_swap. Shown below.
+
+...
+#ifdef COMPARE_AND_SWAP
+void
+lock_acquire(lock_t *l) 
+{
+	while (compare_and_swap(&l->lock, UNLOCKED, LOCKED) != UNLOCKED)
+		;
+}
+#else
+void
+lock_acquire(lock_t *l)
+{
+    while ((int)atomic_swap(&l->lock, LOCKED) != UNLOCKED)
+        ;
+}
+#endif
+...
 
 
 
